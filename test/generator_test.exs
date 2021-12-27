@@ -1,5 +1,6 @@
 defmodule GeneratorTest do
   use ExUnit.Case, async: true
+  import Generator, only: [generator: 2]
   doctest Generator, import: true
 
   defmacrop assert_compile_error(message, do: block) do
@@ -16,9 +17,22 @@ defmodule GeneratorTest do
     end
   end
 
-  describe "generator/2" do
-    import Generator, only: [generator: 2]
+  defp flush_mailbox do
+    messages =
+      generator nil <- nil do
+        receive do
+          message ->
+            {[message], nil}
+        after
+          0 ->
+            {:halt, nil}
+        end
+      end
 
+    Enum.to_list(messages)
+  end
+
+  describe "generator/2" do
     test "success: can create simple enumerable" do
       my_generator =
         generator x <- ?c do
@@ -63,7 +77,7 @@ defmodule GeneratorTest do
       assert Enum.take(my_generator, 3) == 'ace'
     end
 
-    test "success: lazily evaluates initial accumulator" do
+    test "success: lazily evaluates initial state" do
       my_generator =
         generator x <- send(self(), ?a) do
           {[x], x + 1}
@@ -117,7 +131,7 @@ defmodule GeneratorTest do
           if x <= ?c do
             {[x], x + 1}
           else
-            # alter acc here to show it in :after
+            # alter state here to show it in :after
             {:halt, <<x>>}
           end
         after
@@ -173,7 +187,7 @@ defmodule GeneratorTest do
       assert_received ?d
     end
 
-    test "error: fails at runtime if can't match on initial acc" do
+    test "error: fails at runtime if can't match on initial state" do
       my_generator =
         generator {:ok, x} <- ?a do
           {[x], x + 1}
@@ -184,7 +198,7 @@ defmodule GeneratorTest do
       end
     end
 
-    test "error: fails at runtime if can't match on next acc" do
+    test "error: fails at runtime if can't match on next state" do
       my_generator =
         generator {:ok, x} <- {:ok, 0} do
           {:error, x + 1}
