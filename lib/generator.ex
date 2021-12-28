@@ -141,7 +141,6 @@ defmodule Generator do
 
   If a stream is going to be enumerated more than once, it's often better to collect it into a list
   or other collection and pass that to the places it'll be used.
-
   """
   defmacro generator(start, block) do
     {state, initial} =
