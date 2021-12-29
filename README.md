@@ -5,6 +5,7 @@ ones. Generator looks to fill that gap.
 
 ## Installation
 Generator is not available in Hex, but you can still add it to your dependencies and try it out:
+
 ```elixir
 def deps do
   [
@@ -19,9 +20,11 @@ Generators allow you to quickly build streams from an initial value or resource.
 
 Let's start with an example:
 
-    iex> my_generator = generator x <- ?a, do: {[x], x + 1}
-    iex> Enum.take(my_generator, 3)
-    'abc'
+```elixir
+iex> my_generator = generator x <- ?a, do: {[x], x + 1}
+iex> Enum.take(my_generator, 3)
+'abc'
+```
 
 A generator accepts an initial state (right side of `<-`) and a match (left side of `<-`, often a
 variable) for the initial and subsequent state. Any unpinned variables in the match get bound to
@@ -62,7 +65,7 @@ iex> Enum.to_list(my_generator)
 'abc'
 ```
 
-## The `:after` option
+### The `:after` option
 When the generator is operating on a resource (such as an open file), you may need it to clean up
 after itself. You can include code in an `:after` block that gets run once your generator halts,
 even if it halts because of an exception or exit!
@@ -97,7 +100,7 @@ iex> receive do x -> x end
 ?d
 ```
 
-## Generators produce streams
+### Generators produce streams
 Often your generator may not know how many elements to produce. Rather than trying to predict that
 or create situations where a desired length would need passed in, all generators produce streams.
 You can read more about streams in the docs for the `Stream` module, but the general idea is this:
